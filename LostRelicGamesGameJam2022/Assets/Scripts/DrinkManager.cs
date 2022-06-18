@@ -29,7 +29,7 @@ public class DrinkManager : MonoBehaviour
         Drink newDrink = null;
         foreach(var drink in availableDrinks)
         {
-            if (drink.drinkName == name)
+            if (drink.drinkName.ToLower() == name.ToLower())
             {
                 newDrink = drink;
                 break;
@@ -52,7 +52,7 @@ public class DrinkManager : MonoBehaviour
     public void CompleteOrder()
     {
         _hudManager.DisableCompleteOrderButton();
-        _hudManager.ShowButtons();
+        //_hudManager.ShowButtons();
         _hudManager.ResetHUD();
         _currentDrink.ResetTasks();
     }
