@@ -7,6 +7,7 @@ using UnityEngine.UI;
 
 public class HUDManager : MonoBehaviour
 {
+    public GameObject currentDrinkGameObject;
     public TextMeshProUGUI currentDrinkValueText;
     public TextMeshProUGUI currentDrinkTaskListText;
     public Button completeOrderButton;
@@ -21,12 +22,12 @@ public class HUDManager : MonoBehaviour
 
     public void DisableCompleteOrderButton()
     {
-        completeOrderButton.interactable = false;
+        completeOrderButton.gameObject.SetActive(false);
     }
 
     public void EnableCompleteOrderButton()
     {
-        completeOrderButton.interactable = true;
+        completeOrderButton.gameObject.SetActive(true);
     }
 
     public void HideButtons()
@@ -41,16 +42,19 @@ public class HUDManager : MonoBehaviour
 
     public void ResetHUD()
     {
+        currentDrinkGameObject.SetActive(false);
         currentDrinkValueText.text = "None";
         currentDrinkTaskListText.text = "";
         _drinkTaskList = null;
+
     }
 
     public void AssignCurrentDrink(Drink drink)
     {
+        currentDrinkGameObject.SetActive(true);
         _drinkTaskList = new Dictionary<string, Dictionary<string, bool>>();
 
-        currentDrinkValueText.text = drink.drinkName;
+        currentDrinkValueText.text = $"{drink.drinkName}";
         foreach(var taskArray in drink.tasks)
         {
             var taskList = new Dictionary<string, bool>();

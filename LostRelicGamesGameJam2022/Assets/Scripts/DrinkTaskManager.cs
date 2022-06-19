@@ -9,6 +9,8 @@ public class DrinkTaskManager : MonoBehaviour
     [SerializeField]
     private Drink _currentDrink;
 
+    private List<DrinkTask> _allDrinkTasks;
+
     private HashSet<AvailableTask> _currentDrinkTasks;
 
     private HUDManager _hudManager;
@@ -22,6 +24,8 @@ public class DrinkTaskManager : MonoBehaviour
 
     void Start()
     {
+        _allDrinkTasks = FindObjectsOfType<DrinkTask>().ToList();
+
         if (_currentDrink != null)
         {
             AssignCurrentDrink(_currentDrink);
@@ -76,6 +80,19 @@ public class DrinkTaskManager : MonoBehaviour
             task.task.SetUsable(true);
             task.task.SetOnComplete(OnTaskComplete);
             _currentDrinkTasks.Add(task);
+        }
+
+        foreach(var task in _allDrinkTasks)
+        {
+            task.SetActive(true);
+        }
+    }
+
+    public void DeactivateAllTasks()
+    {
+        foreach (var task in _allDrinkTasks)
+        {
+            task.SetActive(false);
         }
     }
 }

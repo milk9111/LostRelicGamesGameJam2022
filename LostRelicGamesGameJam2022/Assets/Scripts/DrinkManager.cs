@@ -10,11 +10,13 @@ public class DrinkManager : MonoBehaviour
 
     private DrinkTaskManager _drinkTaskManager;
     private HUDManager _hudManager;
+    private GameManager _gameManager;
 
     private void Awake()
     {
         _drinkTaskManager = FindObjectOfType<DrinkTaskManager>();
         _hudManager = FindObjectOfType<HUDManager>();
+        _gameManager = FindObjectOfType<GameManager>();
     }
 
     private void Start()
@@ -52,9 +54,10 @@ public class DrinkManager : MonoBehaviour
     public void CompleteOrder()
     {
         _hudManager.DisableCompleteOrderButton();
-        //_hudManager.ShowButtons();
         _hudManager.ResetHUD();
         _currentDrink.ResetTasks();
+        _gameManager.DoneTalkingToPatron();
+        _drinkTaskManager.DeactivateAllTasks();
     }
 
     private void OnFinishDrink()

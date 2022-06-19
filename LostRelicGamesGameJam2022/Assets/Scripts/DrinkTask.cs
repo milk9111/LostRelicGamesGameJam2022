@@ -12,9 +12,34 @@ public class DrinkTask : MonoBehaviour
 
     private bool _usable;
 
+    private Tooltip _tooltip;
+
     protected Action<DrinkTask> _onComplete;
 
-    private void OnMouseDown()
+    private void Start()
+    {
+        _tooltip = FindObjectOfType<Tooltip>();
+    }
+
+    public void Clicked()
+    {
+        Debug.Log(gameObject.name);
+
+        if (!_active)
+        {
+            return;
+        }
+
+        if (!_usable)
+        {
+            // TODO: sound effect here
+            return;
+        }
+
+        Activate();
+    }
+
+    void OnMouseUp()
     {
         if (!_active)
         {
@@ -37,11 +62,14 @@ public class DrinkTask : MonoBehaviour
             return;
         }
 
+        _tooltip.TurnOn(gameObject.name);
+
         Cursor.SetCursor(Perpetual.i.hoverCursor, Vector2.zero, CursorMode.Auto);
     }
 
     private void OnMouseExit()
     {
+        _tooltip.TurnOff();
         Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
     }
 

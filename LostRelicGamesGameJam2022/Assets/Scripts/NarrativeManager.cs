@@ -58,7 +58,7 @@ public class NarrativeManager : MonoBehaviour
     {
         _currentNode = null;
         _dialogueUIManager.Flush();
-        _gameManager.DoneTalkingToPatron();
+        _gameManager.FinishedTalking();
     }
 
     public void ContinueNarrative(int choiceIndex)

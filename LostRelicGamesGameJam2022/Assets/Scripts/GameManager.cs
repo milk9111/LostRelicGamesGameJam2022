@@ -30,8 +30,11 @@ public class GameManager : MonoBehaviour
         if (!_started)
         {
             _started = true;
-            currentPatron.SetIsTalking(true);
-            _narrativeManager.StartNarrative(currentPatron.GetPatronName() + "_start");
+            currentPatron.TransitionIn(() =>
+            {
+                currentPatron.SetIsTalking(true);
+                _narrativeManager.StartNarrative(currentPatron.GetPatronName() + "_start");
+            });
             //_narrativeManager.StartNarrative(currentPatron.GetPatronName() + "_start" + ".cheerful_response");
         }
     }
@@ -46,8 +49,19 @@ public class GameManager : MonoBehaviour
         _narrativeManager.StartNarrative(currentPatron.GetPatronName() + "_start" + ".convo_start");
     }
 
-    public void DoneTalkingToPatron()
+    public void FinishedTalking()
     {
         currentPatron.SetIsTalking(false);
+    }
+
+    public void DoneTalkingToPatron()
+    {
+        Debug.Log("done talking");
+        currentPatron.SetIsTalking(false);
+        currentPatron.TransitionOut(() =>
+        {
+            Debug.Log("Transitioned out");
+        });
+        _narrativeManager.Flush();
     }
 }
