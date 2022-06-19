@@ -5,12 +5,16 @@ using UnityEngine;
 public class GameManager : MonoBehaviour
 {
     public bool mute;
+    public int numberOfRandomConvos;
 
     public Patron currentPatron;
 
     private bool _started;
+    private string _patronBase;
+
     private NarrativeManager _narrativeManager;
     private DrinkManager _drinkManager;
+    private DayManager _dayManager;
 
     private void Awake()
     {
@@ -21,6 +25,7 @@ public class GameManager : MonoBehaviour
     {
         _narrativeManager = FindObjectOfType<NarrativeManager>();
         _drinkManager = FindObjectOfType<DrinkManager>();
+        _dayManager = FindObjectOfType<DayManager>();
     }
 
     private void Update()
@@ -30,12 +35,25 @@ public class GameManager : MonoBehaviour
         if (!_started)
         {
             _started = true;
-            currentPatron.TransitionIn(() =>
+            _dayManager.StartTransition(() =>
             {
-                currentPatron.SetIsTalking(true);
-                _narrativeManager.StartNarrative(currentPatron.GetPatronName() + "_start");
+                currentPatron = _dayManager.GetNextPatron();
+                currentPatron.TransitionIn(() =>
+                {
+                    currentPatron.SetIsTalking(true);
+                    if (currentPatron.GetPatronName() == "charles")
+                    {
+                        _patronBase = "charles_start_" + _dayManager.GetNextCharlesDay();
+                    }
+                    else
+                    {
+                        _patronBase = $"random_{Mathf.FloorToInt(Random.value * 10) % numberOfRandomConvos}";
+                    }
+
+                    Debug.Log(_patronBase);
+                    _narrativeManager.StartNarrative(_patronBase);
+                });
             });
-            //_narrativeManager.StartNarrative(currentPatron.GetPatronName() + "_start" + ".cheerful_response");
         }
     }
 
@@ -46,7 +64,7 @@ public class GameManager : MonoBehaviour
 
     public void TalkToPatron()
     {
-        _narrativeManager.StartNarrative(currentPatron.GetPatronName() + "_start" + ".convo_start");
+        _narrativeManager.StartNarrative(_patronBase + ".convo_start");
     }
 
     public void FinishedTalking()
@@ -56,11 +74,33 @@ public class GameManager : MonoBehaviour
 
     public void DoneTalkingToPatron()
     {
-        Debug.Log("done talking");
         currentPatron.SetIsTalking(false);
         currentPatron.TransitionOut(() =>
         {
-            Debug.Log("Transitioned out");
+            currentPatron = _dayManager.GetNextPatron();
+            if (currentPatron == null)
+            {
+                Debug.LogError("REACHED LAST PATRON");
+                _dayManager.FinishDay();
+                _started = false;
+                return;
+            }
+
+            currentPatron.TransitionIn(() =>
+            {
+                currentPatron.SetIsTalking(true);
+                if (currentPatron.GetPatronName() == "charles")
+                {
+                    _patronBase = "charles_start_" + _dayManager.GetNextCharlesDay();
+                }
+                else
+                {
+                    _patronBase = $"random_{Mathf.FloorToInt(Random.value * 10) % numberOfRandomConvos}";
+                }
+
+                Debug.Log(_patronBase);
+                _narrativeManager.StartNarrative(_patronBase);
+            });
         });
         _narrativeManager.Flush();
     }

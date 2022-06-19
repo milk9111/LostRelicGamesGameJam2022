@@ -8,9 +8,9 @@ public class DrinkTask : MonoBehaviour
     [HideInInspector]
     public string taskHeader;
 
-    private bool _active;
+    public bool _active;
 
-    private bool _usable;
+    public bool _usable;
 
     private Tooltip _tooltip;
 

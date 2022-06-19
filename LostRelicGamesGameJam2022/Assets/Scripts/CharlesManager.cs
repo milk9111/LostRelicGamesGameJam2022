@@ -24,9 +24,12 @@ public class CharlesManager : MonoBehaviour
     {
         if (!_charlesDays.Any())
         {
+            Debug.Log("not any charles days");
             return -1;
         }
 
-        return _charlesDays.Dequeue();
+        Debug.Log("some charles days");
+
+        return _charlesDays.Dequeue() - 1;
     }
 }

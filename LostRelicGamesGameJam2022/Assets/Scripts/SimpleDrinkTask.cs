@@ -4,22 +4,28 @@ using UnityEngine;
 
 public class SimpleDrinkTask : DrinkTask
 {
+    public AudioData fx;
+
     private SpriteRenderer _renderer;
+    private Animator _animator;
+    private UnitSoundPlayer _soundPlayer;
 
     private void Awake()
     {
         _renderer = GetComponent<SpriteRenderer>();
+        _animator = GetComponent<Animator>();
+        _soundPlayer = GetComponent<UnitSoundPlayer>();
     }
 
     public override void ResetTask()
     {
-        _renderer.color = Color.white;
         base.SetActive(false);
     }
 
     public override void Activate()
     {
-        _renderer.color = Color.green;
+        _soundPlayer.PlayOneShot(fx);
+        _animator.Play("task");
         base._onComplete(this);
     }
 }

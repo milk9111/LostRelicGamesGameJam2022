@@ -10,13 +10,17 @@ public class DayManager : MonoBehaviour
 {
     public string startDate;
     public List<Patron> patrons;
+    public bool onlyUseCharles;
 
     private CharlesManager _charlesManager;
+    public DayTransition _dayTransition;
 
-    private Queue<Patron> _currentDayPatrons;
+    public Queue<Patron> _currentDayPatrons;
+    public int _currentDayPatronCount;
 
     private int _daysSinceStart;
     private int _nextCharlesDay;
+    private bool _started;
 
     // Start is called before the first frame update
     void Awake()
@@ -28,6 +32,24 @@ public class DayManager : MonoBehaviour
     {
         _charlesManager = FindObjectOfType<CharlesManager>();
         _nextCharlesDay = _charlesManager.GetNextDay();
+
+        _dayTransition.gameObject.SetActive(false);
+    }
+
+    public int GetNextCharlesDay()
+    {
+        return _nextCharlesDay;
+    }
+
+    public void StartTransition(Action callback)
+    {
+        _dayTransition.gameObject.SetActive(true);
+        _dayTransition.Play(GetCurrentDate(), CurrentDate().AddDays(-1).ToString("MM/dd/yyyy"), () =>
+        {
+            _dayTransition.gameObject.SetActive(false);
+            StartDay();
+            callback();
+        });
     }
 
     public void StartDay()
@@ -37,25 +59,59 @@ public class DayManager : MonoBehaviour
             patron.gameObject.SetActive(false);
         }
 
+        _charlesManager.charlesPatron.gameObject.SetActive(false);
+
         var numberOfPatronsToday = Random.Range(3, 6);
-        _currentDayPatrons = new Queue<Patron>();
-        while(_currentDayPatrons.Count < numberOfPatronsToday)
+        var currentDayPatrons = new List<Patron>();
+        var _currentCount = 0;
+        while (_currentCount < numberOfPatronsToday)
         {
-            foreach(var patron in patrons.Except(_currentDayPatrons))
+            var remainingPatrons = new List<Patron>();
+            foreach (var patron in patrons)
             {
-                if (Random.value < 0.5)
+                var found = false;
+                foreach (var currentPatron in currentDayPatrons)
                 {
-                    _currentDayPatrons.Enqueue(patron);
-                    break;
+                    if (currentPatron == patron)
+                    {
+                        found = true;
+                        break;
+                    }
                 }
+
+                if (!found)
+                {
+                    remainingPatrons.Add(patron);
+                }
+            }
+            currentDayPatrons.Add(remainingPatrons.ToList()[Mathf.FloorToInt(Random.value * 10) % remainingPatrons.Count()]);
+            _currentCount++;
+        }
+
+        _currentDayPatrons = new Queue<Patron>();
+        if (!onlyUseCharles)
+        {
+            foreach (var patron in currentDayPatrons)
+            {
+                _currentDayPatrons.Enqueue(patron);
             }
         }
 
         if (_daysSinceStart == _nextCharlesDay)
         {
-            _nextCharlesDay = _charlesManager.GetNextDay();
+            Debug.LogError("Adding charles");
+            if (_started)
+            {
+                _nextCharlesDay = _charlesManager.GetNextDay();
+            } else
+            {
+                _started = true;
+            }
+            
             _currentDayPatrons.Enqueue(_charlesManager.charlesPatron);
         }
+
+        _currentDayPatronCount = _currentDayPatrons.Count();
     }
 
     public Patron GetNextPatron()
@@ -65,12 +121,20 @@ public class DayManager : MonoBehaviour
             return null;
         }
 
-        return _currentDayPatrons.Dequeue();
+        var patron = _currentDayPatrons.Dequeue();
+        patron.gameObject.SetActive(true);
+
+        return patron;
     }
 
     public void FinishDay()
     {
         _daysSinceStart++;
+    }
+
+    private DateTime CurrentDate()
+    {
+        return DateTime.ParseExact(startDate, "yyyy-MM-dd", CultureInfo.InvariantCulture).AddDays(_daysSinceStart);
     }
 
     public string GetCurrentDate()

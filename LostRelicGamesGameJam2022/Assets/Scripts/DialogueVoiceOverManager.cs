@@ -31,7 +31,7 @@ public class DialogueVoiceOverManager : MonoBehaviour
 
         if (_activePatron == null)
         {
-            Debug.LogWarning($"Couldn't find patron! {name}");
+            //Debug.LogWarning($"Couldn't find patron! {name}");
             _activePatron = patrons.First();
         }
     }

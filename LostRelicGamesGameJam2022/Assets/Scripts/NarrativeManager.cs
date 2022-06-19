@@ -27,11 +27,22 @@ public class NarrativeManager : MonoBehaviour
         _dialogueUIManager = FindObjectOfType<DialogueUIManager>();
         _gameManager = FindObjectOfType<GameManager>();
 
-        _inkStory = new Story(inkAsset.text);
+        //ResetInkStory();
+    }
 
-        _inkStory.ObserveVariable("drink", (string varName, object newValue) => {
-            _gameManager.AssignCurrentDrink((string)newValue);
-        });
+    private void ResetInkStory()
+    {
+        if (_inkStory == null)
+        {
+            _inkStory = new Story(inkAsset.text);
+            _inkStory.ObserveVariable("drink", (string varName, object newValue) => {
+                _gameManager.AssignCurrentDrink((string)newValue);
+            });
+        } else
+        {
+            _inkStory.ResetState();
+            _inkStory.ResetCallstack();
+        }
     }
 
     public void StartNarrative(string path)
@@ -41,7 +52,15 @@ public class NarrativeManager : MonoBehaviour
             path = "exhausted_dialogue";
         }
 
+        ResetInkStory();
+
         _inkStory.ChoosePathString(path);
+        if (!_inkStory.canContinue)
+        {
+            Debug.LogError($"Can't continue - ran out of content: {path}");
+            return;
+        }
+
         _inkStory.Continue();
         if (_inkStory.currentChoices.Any())
         {

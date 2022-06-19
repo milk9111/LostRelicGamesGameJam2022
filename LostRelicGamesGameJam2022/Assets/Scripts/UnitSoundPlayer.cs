@@ -1,13 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 [RequireComponent(typeof(AudioSource))]
 public class UnitSoundPlayer : MonoBehaviour
 {
     private AudioSource _source;
-    private AudioSource _repeatSource;
+    private List<AudioSource> _repeatSource;
 
     private float _lastVolume;
 
@@ -15,6 +16,7 @@ public class UnitSoundPlayer : MonoBehaviour
     void Awake()
     {
         _source = GetComponent<AudioSource>();
+        _repeatSource = new List<AudioSource>();
     }
 
     public void PlayOneShot(AudioClip clip, float volume = 1f)
@@ -35,21 +37,36 @@ public class UnitSoundPlayer : MonoBehaviour
 
     public void PlayRepeating(AudioClip clip, float volume = 1f)
     {
-        if (_repeatSource == null)
+        var repeatSource = GetSource(clip.name);
+        if (repeatSource == null)
         {
-            _repeatSource = gameObject.AddComponent<AudioSource>();
+            repeatSource = gameObject.AddComponent<AudioSource>();
+            _repeatSource.Add(repeatSource);
         }
 
-        if (_repeatSource.isPlaying && _repeatSource.clip?.name == clip.name)
+        if (repeatSource.isPlaying && repeatSource.clip?.name == clip.name)
         {
             return;
         }
 
-        _repeatSource.loop = true;
-        _repeatSource.volume = volume;
-        _repeatSource.clip = clip;
+        repeatSource.loop = true;
+        repeatSource.volume = volume;
+        repeatSource.clip = clip;
         _lastVolume = volume;
-        _repeatSource.Play();
+        repeatSource.Play();
+    }
+
+    private AudioSource GetSource(string clipName)
+    {
+        foreach(var audioSource in _repeatSource)
+        {
+            if (audioSource.clip?.name == clipName)
+            {
+                return audioSource;
+            }
+        }
+
+        return null;
     }
 
     public void PlayRepeating(AudioData audioData)
@@ -57,25 +74,29 @@ public class UnitSoundPlayer : MonoBehaviour
         PlayRepeating(audioData.audioClip, audioData.volume);
     }
 
-    public void StopRepeating()
+    public void StopRepeating(string clipName)
     {
-        if (_repeatSource == null)
+        var repeatSource = GetSource(clipName);
+        if (repeatSource == null)
         {
             return;
         }
 
-        _repeatSource.Stop();
-        _repeatSource.loop = false;
-        _repeatSource.volume = _lastVolume;
-        _repeatSource.clip = null;
+        repeatSource.Stop();
+        repeatSource.loop = false;
+        repeatSource.volume = _lastVolume;
+        repeatSource.clip = null;
     }
 
     public void Mute()
     {
         _source.volume = 0f;
-        if (_repeatSource != null)
+        if (_repeatSource != null && _repeatSource.Any())
         {
-            _repeatSource.volume = 0f;
+            foreach(var audioSource in _repeatSource)
+            {
+                audioSource.volume = 0f;
+            }
         }
     }
 
@@ -84,7 +105,13 @@ public class UnitSoundPlayer : MonoBehaviour
         _source.volume = _lastVolume;
         if (_repeatSource != null)
         {
-            _repeatSource.volume = _lastVolume;
+            if (_repeatSource != null && _repeatSource.Any())
+            {
+                foreach (var audioSource in _repeatSource)
+                {
+                    audioSource.volume = _lastVolume;
+                }
+            }
         }
     }
 

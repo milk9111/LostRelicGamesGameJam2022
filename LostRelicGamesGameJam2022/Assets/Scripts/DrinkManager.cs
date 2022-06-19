@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class DrinkManager : MonoBehaviour
@@ -40,8 +41,7 @@ public class DrinkManager : MonoBehaviour
 
         if (newDrink == null)
         {
-            Debug.LogError($"Could not find drink of name {name}");
-            return;
+            newDrink = availableDrinks.First();
         }
 
         _currentDrink = newDrink;

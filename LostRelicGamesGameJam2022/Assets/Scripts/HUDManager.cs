@@ -46,7 +46,6 @@ public class HUDManager : MonoBehaviour
         currentDrinkValueText.text = "None";
         currentDrinkTaskListText.text = "";
         _drinkTaskList = null;
-
     }
 
     public void AssignCurrentDrink(Drink drink)

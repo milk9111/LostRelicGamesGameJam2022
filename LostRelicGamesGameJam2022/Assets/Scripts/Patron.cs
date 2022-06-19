@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class Patron : MonoBehaviour
 {
+    public bool useRandomConvo;
+
     private GameManager _gameManager;
     private bool _isTalking;
     private Animator _animator;
@@ -15,7 +17,6 @@ public class Patron : MonoBehaviour
     private void Awake()
     {
         _animator = GetComponent<Animator>();
-
     }
 
     private void Start()
